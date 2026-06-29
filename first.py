@@ -22,6 +22,7 @@ def add_student():
     age_input.value = ""
 
 
+# ===== SHOW ALL =====
 def show_students():
     if not students:
         status.value = "No students"
@@ -34,13 +35,42 @@ def show_students():
     status.value = text
 
 
+# ===== SEARCH (新增) =====
+def search_student():
+    keyword = name_input.value.strip().lower()
+
+    if not keyword:
+        status.value = "❌ Enter name to search"
+        return
+
+    results = []
+    for s in students:
+        if keyword in s["name"].lower():
+            results.append(s)
+
+    if not results:
+        status.value = "🔍 No match found"
+        return
+
+    text = "🔍 Search Results\n────────────\n"
+    for i, s in enumerate(results):
+        text += f"{i+1}. {s['name']} ({s['age']})\n"
+
+    status.value = text
+
+
+# ===== DELETE (优化版) =====
 def delete_student():
-    name = name_input.value.strip()
+    name = name_input.value.strip().lower()
+
+    if not name:
+        status.value = "❌ Enter name to delete"
+        return
 
     for s in students:
-        if s["name"] == name:
+        if s["name"].lower() == name:
             students.remove(s)
-            status.value = f"🗑 Deleted {name}"
+            status.value = f"🗑 Deleted {s['name']}"
             return
 
     status.value = "❌ Not found"
@@ -66,22 +96,12 @@ Text(input_box, "INPUT", color="#555555")
 Text(input_box, "Name", color="#333333")
 name_input = TextBox(input_box, width=25)
 
-# ✅ 强制修复输入框可见性（关键）
-name_input.tk.config(
-    fg="black",
-    bg="white",
-    insertbackground="black"
-)
+name_input.tk.config(fg="black", bg="white", insertbackground="black")
 
 Text(input_box, "Age", color="#333333")
 age_input = TextBox(input_box, width=25)
 
-# ✅ 同样修复
-age_input.tk.config(
-    fg="black",
-    bg="white",
-    insertbackground="black"
-)
+age_input.tk.config(fg="black", bg="white", insertbackground="black")
 
 
 # ===== BUTTONS =====
@@ -91,6 +111,7 @@ Text(btn_box, "ACTIONS", color="#555555")
 
 PushButton(btn_box, text="➕ Add", command=add_student, width=12)
 PushButton(btn_box, text="📋 Show", command=show_students, width=12)
+PushButton(btn_box, text="🔍 Search", command=search_student, width=12)
 PushButton(btn_box, text="🗑 Delete", command=delete_student, width=12)
 
 
