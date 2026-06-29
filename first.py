@@ -1,81 +1,105 @@
+from guizero import App, Text, TextBox, PushButton, Box
+
 students = []
 
+# ===== logic =====
 def add_student():
-    name = input("Enter student name: ")
+    name = name_input.value.strip()
+    age = age_input.value.strip()
 
-    try:
-        age = int(input("Enter student age: "))
-    except ValueError:
-        print("❌ Age must be a number!")
+    if not name or not age:
+        status.value = "❌ Fill all fields"
         return
 
-    student = {
-        "name": name,
-        "age": age
-    }
+    if not age.isdigit():
+        status.value = "❌ Age must be number"
+        return
 
-    students.append(student)
-    print("✅ Student added successfully!")
+    students.append({"name": name, "age": int(age)})
+    status.value = f"✅ Added {name}"
+
+    name_input.value = ""
+    age_input.value = ""
 
 
 def show_students():
-    if len(students) == 0:
-        print("No students found.")
+    if not students:
+        status.value = "No students"
         return
 
-    print("\n--- Student List ---")
+    text = "📚 Students\n────────────\n"
     for i, s in enumerate(students):
-        print(f"{i+1}. Name: {s['name']}, Age: {s['age']}")
+        text += f"{i+1}. {s['name']} ({s['age']})\n"
+
+    status.value = text
 
 
 def delete_student():
-    name = input("Enter name to delete: ")
+    name = name_input.value.strip()
 
     for s in students:
         if s["name"] == name:
             students.remove(s)
-            print("🗑 Student deleted successfully!")
+            status.value = f"🗑 Deleted {name}"
             return
 
-    print("❌ Student not found.")
+    status.value = "❌ Not found"
 
 
-def search_student():
-    name = input("Enter name to search: ")
+# ===== APP =====
+app = App("Student Manager", width=540, height=600, bg="#eef1f6")
 
-    for s in students:
-        if s["name"] == name:
-            print(f"🎯 Found: Name: {s['name']}, Age: {s['age']}")
-            return
-
-    print("❌ Student not found.")
+Text(app, "Student Management System", size=18, color="#1f2d3d")
 
 
-while True:
-    print("\n===== Student Management System =====")
-    print("1. Add Student")
-    print("2. Show Students")
-    print("3. Delete Student")
-    print("4. Search Student")
-    print("5. Exit")
+# =========================
+# MAIN LAYOUT
+# =========================
+main = Box(app, layout="grid", width="fill", height=220)
 
-    choice = input("Enter choice: ")
 
-    if choice == "1":
-        add_student()
+# ===== INPUT =====
+input_box = Box(main, grid=[0, 0], width=260, height=200)
 
-    elif choice == "2":
-        show_students()
+Text(input_box, "INPUT", color="#555555")
 
-    elif choice == "3":
-        delete_student()
+Text(input_box, "Name", color="#333333")
+name_input = TextBox(input_box, width=25)
 
-    elif choice == "4":
-        search_student()
+# ✅ 强制修复输入框可见性（关键）
+name_input.tk.config(
+    fg="black",
+    bg="white",
+    insertbackground="black"
+)
 
-    elif choice == "5":
-        print("Exiting system...")
-        break
+Text(input_box, "Age", color="#333333")
+age_input = TextBox(input_box, width=25)
 
-    else:
-        print("Invalid choice, try again.")
+# ✅ 同样修复
+age_input.tk.config(
+    fg="black",
+    bg="white",
+    insertbackground="black"
+)
+
+
+# ===== BUTTONS =====
+btn_box = Box(main, grid=[1, 0], width=220, height=200)
+
+Text(btn_box, "ACTIONS", color="#555555")
+
+PushButton(btn_box, text="➕ Add", command=add_student, width=12)
+PushButton(btn_box, text="📋 Show", command=show_students, width=12)
+PushButton(btn_box, text="🗑 Delete", command=delete_student, width=12)
+
+
+# ===== OUTPUT =====
+output_box = Box(app, width="fill", height=300, border=1)
+
+Text(output_box, "OUTPUT", color="#555555")
+
+status = Text(output_box, text="Ready", size=10, color="black")
+
+
+app.display()
