@@ -1,12 +1,13 @@
 from guizero import App, Text, TextBox, PushButton, Box
+import time
 
 # =========================
-# DATA STRUCTURE
+# DATA
 # =========================
 students = []
 
 # =========================
-# UTIL: GRADE SYSTEM
+# GRADE
 # =========================
 def get_grade(score):
     if score >= 90:
@@ -22,7 +23,7 @@ def get_grade(score):
 
 
 # =========================
-# ADD STUDENT
+# ADD
 # =========================
 def add_student():
     name = name_input.value.strip()
@@ -50,7 +51,7 @@ def add_student():
 
 
 # =========================
-# SHOW ALL
+# SHOW
 # =========================
 def show_students():
     if not students:
@@ -65,19 +66,12 @@ def show_students():
 
 
 # =========================
-# SEARCH (Linear Search O(n))
+# SEARCH
 # =========================
 def search_student():
     keyword = name_input.value.strip().lower()
 
-    if not keyword:
-        status.value = "❌ Enter name to search"
-        return
-
-    results = []
-    for s in students:
-        if keyword in s["name"].lower():
-            results.append(s)
+    results = [s for s in students if keyword in s["name"].lower()]
 
     if not results:
         status.value = "🔍 No match found"
@@ -96,10 +90,6 @@ def search_student():
 def delete_student():
     keyword = name_input.value.strip().lower()
 
-    if not keyword:
-        status.value = "❌ Enter name to delete"
-        return
-
     for s in students:
         if s["name"].lower() == keyword:
             students.remove(s)
@@ -110,7 +100,7 @@ def delete_student():
 
 
 # =========================
-# SORT / RANKING (O(n log n))
+# RANKING
 # =========================
 def show_ranking():
     if not students:
@@ -136,57 +126,62 @@ def show_statistics():
 
     scores = [s["score"] for s in students]
 
-    avg = sum(scores) / len(scores)
-    max_score = max(scores)
-    min_score = min(scores)
-
-    text = (
+    status.value = (
         "📊 Statistics\n────────────\n"
-        f"Average: {avg:.2f}\n"
-        f"Highest: {max_score}\n"
-        f"Lowest: {min_score}\n"
-        f"Total: {len(students)}"
+        f"Average: {sum(scores)/len(scores):.2f}\n"
+        f"Highest: {max(scores)}\n"
+        f"Lowest: {min(scores)}\n"
+        f"Total: {len(scores)}"
     )
-
-    status.value = text
 
 
 # =========================
 # GUI
 # =========================
-app = App("Student Score System", width=560, height=620, bg="#eef1f6")
+app = App("Student System", width=560, height=700, bg="#eef1f6")
 
-Text(app, "Student Score Management System", size=18, color="#1f2d3d")
+Text(app, "Student Management System", size=18, color="#1f2d3d")
 
-main = Box(app, layout="grid", width="fill", height=220)
+main = Box(app, layout="vertical")
 
-# INPUT
-input_box = Box(main, grid=[0, 0], width=260, height=200)
+# ================= INPUT =================
+input_box = Box(main, width="fill")
+
 Text(input_box, "INPUT", color="#555555")
 
 Text(input_box, "Name")
-name_input = TextBox(input_box, width=25)
-name_input.tk.config(fg="black", bg="white", insertbackground="black")
+name_input = TextBox(input_box, width=30)
+name_input.tk.config(
+    bg="white",
+    fg="black",
+    insertbackground="black"
+)
 
 Text(input_box, "Score")
-score_input = TextBox(input_box, width=25)
-score_input.tk.config(fg="black", bg="white", insertbackground="black")
+score_input = TextBox(input_box, width=30)
+score_input.tk.config(
+    bg="white",
+    fg="black",
+    insertbackground="black"
+)
 
-# BUTTONS
-btn_box = Box(main, grid=[1, 0], width=260, height=200)
+# ================= BUTTONS =================
+btn_box = Box(main, width="fill")
+
 Text(btn_box, "ACTIONS", color="#555555")
 
-PushButton(btn_box, text="➕ Add", command=add_student, width=14)
-PushButton(btn_box, text="📋 Show All", command=show_students, width=14)
-PushButton(btn_box, text="🔍 Search", command=search_student, width=14)
-PushButton(btn_box, text="🗑 Delete", command=delete_student, width=14)
-PushButton(btn_box, text="🏆 Ranking", command=show_ranking, width=14)
-PushButton(btn_box, text="📊 Statistics", command=show_statistics, width=14)
+PushButton(btn_box, text="Add", command=add_student, width=20)
+PushButton(btn_box, text="Show", command=show_students, width=20)
+PushButton(btn_box, text="Search", command=search_student, width=20)
+PushButton(btn_box, text="Delete", command=delete_student, width=20)
+PushButton(btn_box, text="Ranking", command=show_ranking, width=20)
+PushButton(btn_box, text="Stats", command=show_statistics, width=20)
 
-# OUTPUT
-output_box = Box(app, width="fill", height=320, border=1)
-Text(output_box, "OUTPUT", color="#555555")
+# ================= OUTPUT =================
+output = Box(app, width="fill", height=300, border=1)
 
-status = Text(output_box, text="Ready", size=10, color="black")
+Text(output, "OUTPUT", color="#555555")
+
+status = Text(output, text="Ready")
 
 app.display()
