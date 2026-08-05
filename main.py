@@ -3,210 +3,214 @@ import random
 import time
 
 
-# ======================
-# 游戏窗口
-# ======================
+# =====================
+# 初始化窗口
+# =====================
+
 screen = turtle.Screen()
-screen.title("Python Turtle 飞机大战")
+screen.setup(600,800)
 screen.bgcolor("black")
-screen.setup(width=600, height=800)
+screen.title("Turtle 飞机大战")
+
 screen.tracer(0)
 
 
-# ======================
-# 加载飞机图片
-# ======================
-screen.register_shape("plane_small.png")
 
-
-
-# ======================
+# =====================
 # 玩家飞机
-# ======================
+# =====================
+
 player = turtle.Turtle()
 
-player.shape("plane_small.png")
+player.shape("triangle")
+player.color("cyan")
 
 player.penup()
 
-player.goto(0, -300)
+player.goto(0,-300)
 
-player.speed(0)
+player_speed=30
 
 
 
-# ======================
+# =====================
 # 子弹
-# ======================
-bullets = []
+# =====================
 
-score = 0
-
+bullets=[]
 
 
-def create_bullet(x, y, color="yellow", size=1):
-
-    bullet = turtle.Turtle()
-
-    bullet.shape("circle")
-
-    bullet.color(color)
-
-    bullet.shapesize(size, size)
-
-    bullet.penup()
-
-    bullet.speed(0)
-
-    bullet.goto(x, y)
-
-    bullet.dy = 15
-
-    bullets.append(bullet)
-
-
-
-
-# ======================
-# 射击系统
-# ======================
 def shoot():
 
+    b=turtle.Turtle()
 
-    # 500分 激光
+    b.shape("square")
+    b.color("yellow")
 
-    if score >= 500:
+    b.shapesize(
+        0.5,
+        0.1
+    )
 
-        create_bullet(
-            player.xcor(),
-            player.ycor()+40,
-            "cyan",
-            0.4
-        )
+    b.penup()
 
-
-    # 200分 三发
-
-    elif score >= 200:
-
-        create_bullet(
-            player.xcor()-25,
-            player.ycor()+30
-        )
-
-        create_bullet(
-            player.xcor(),
-            player.ycor()+40
-        )
-
-        create_bullet(
-            player.xcor()+25,
-            player.ycor()+30
-        )
-
-
-    # 100分 双发
-
-    elif score >=100:
-
-        create_bullet(
-            player.xcor()-12,
-            player.ycor()+30
-        )
-
-        create_bullet(
-            player.xcor()+12,
-            player.ycor()+30
-        )
-
-
-    # 普通单发
-
-    else:
-
-        create_bullet(
-            player.xcor(),
-            player.ycor()+30
-        )
-
-
-
-
-
-# ======================
-# 敌机
-# ======================
-enemies=[]
-
-
-
-def create_enemy():
-
-    enemy=turtle.Turtle()
-
-    enemy.shape("square")
-
-    enemy.color("red")
-
-    enemy.penup()
-
-    enemy.speed(0)
-
-
-    enemy.goto(
-        random.randint(-250,250),
-        350
+    b.goto(
+        player.xcor(),
+        player.ycor()+20
     )
 
 
-    enemy.dy=random.randint(2,5)
-
-
-    enemies.append(enemy)
+    bullets.append(b)
 
 
 
 
+# =====================
+# 敌机
+# =====================
 
-# ======================
+enemies=[]
+
+
+class Enemy:
+
+
+    def __init__(self):
+
+        self.obj=turtle.Turtle()
+
+        self.obj.shape("square")
+
+        self.obj.color("red")
+
+        self.obj.penup()
+
+
+        self.obj.goto(
+
+            random.randint(-250,250),
+
+            350
+
+        )
+
+
+        # 下落速度
+
+        self.speed_y=random.randint(2,5)
+
+
+        # 横向速度
+
+        self.speed_x=random.choice(
+            [-3,-2,-1,1,2,3]
+        )
+
+
+
+    def move(self):
+
+
+        x=self.obj.xcor()
+
+        y=self.obj.ycor()
+
+
+        x+=self.speed_x
+
+        y-=self.speed_y
+
+
+
+        # 左右反弹
+
+        if x>270 or x<-270:
+
+            self.speed_x*=-1
+
+
+
+        self.obj.goto(
+            x,
+            y
+        )
+
+
+
+
+
+# =====================
 # 玩家移动
-# ======================
-def move_left():
-
-    x=player.xcor()-30
-
-    if x<-270:
-        x=-270
-
-    player.setx(x)
+# =====================
 
 
+def left():
 
-def move_right():
+    x=player.xcor()-player_speed
 
-    x=player.xcor()+30
+    if x>-270:
 
-    if x>270:
-        x=270
-
-    player.setx(x)
+        player.goto(
+            x,
+            player.ycor()
+        )
 
 
 
+def right():
+
+    x=player.xcor()+player_speed
+
+    if x<270:
+
+        player.goto(
+            x,
+            player.ycor()
+        )
 
 
-# ======================
-# 分数显示
-# ======================
+
+screen.listen()
+
+screen.onkeypress(
+    left,
+    "Left"
+)
+
+screen.onkeypress(
+    right,
+    "Right"
+)
+
+
+screen.onkeypress(
+    shoot,
+    "space"
+)
+
+
+
+
+# =====================
+# 分数
+# =====================
+
+
+score=0
+
+
 score_text=turtle.Turtle()
 
 score_text.color("white")
 
 score_text.penup()
 
-score_text.hideturtle()
+score_text.goto(
+    -280,
+    350
+)
 
-score_text.goto(-280,350)
+score_text.hideturtle()
 
 
 
@@ -214,105 +218,34 @@ def update_score():
 
     score_text.clear()
 
-
-    weapon="单发"
-
-
-    if score>=100:
-        weapon="双发"
-
-
-    if score>=200:
-        weapon="三发"
-
-
-    if score>=500:
-        weapon="激光"
-
-
-    if score>=1000:
-        weapon="自动连射"
-
-
-
     score_text.write(
-        f"Score:{score}  {weapon}",
-        font=("Arial",16,"normal")
+
+        f"Score:{score}",
+
+        font=(
+            "Arial",
+            20,
+            "normal"
+        )
+
     )
 
 
 
-update_score()
 
 
-
-
-
-# ======================
-# 键盘
-# ======================
-screen.listen()
-
-
-screen.onkeypress(move_left,"Left")
-
-screen.onkeypress(move_right,"Right")
-
-screen.onkeypress(shoot,"space")
-
-
-
-
-
-# ======================
-# 碰撞检测
-# ======================
-def collision(a,b):
-
-    return a.distance(b)<25
-
-
-
-
-
-
-# ======================
+# =====================
 # 游戏循环
-# ======================
-game_over=False
+# =====================
 
 
 enemy_timer=0
 
-auto_timer=0
 
-
-
-while not game_over:
+while True:
 
 
     screen.update()
-
-
-    time.sleep(0.02)
-
-
-
-    # 自动射击
-
-    if score>=1000:
-
-
-        auto_timer+=1
-
-
-        if auto_timer>8:
-
-            shoot()
-
-            auto_timer=0
-
-
 
 
 
@@ -321,121 +254,83 @@ while not game_over:
     enemy_timer+=1
 
 
-    if enemy_timer>50:
+    if enemy_timer>40:
 
-        create_enemy()
+        enemies.append(
+            Enemy()
+        )
 
         enemy_timer=0
 
 
 
 
-
     # 子弹移动
 
-    for bullet in bullets[:]:
+    for b in bullets[:]:
 
-
-        bullet.sety(
-            bullet.ycor()+bullet.dy
+        b.sety(
+            b.ycor()+15
         )
 
 
+        if b.ycor()>400:
 
-        if bullet.ycor()>400:
+            bullets.remove(b)
 
-
-            bullet.hideturtle()
-
-            bullets.remove(bullet)
-
+            b.hideturtle()
 
 
 
 
     # 敌机移动
 
-    for enemy in enemies[:]:
+    for e in enemies[:]:
 
-
-        enemy.sety(
-            enemy.ycor()-enemy.dy
-        )
-
-
-        # 撞飞机
-
-        if collision(enemy,player):
-
-            game_over=True
+        e.move()
 
 
 
-        # 飞出屏幕
+        if e.obj.ycor()<-400:
 
-        if enemy.ycor()<-400:
+            enemies.remove(e)
 
-            enemy.hideturtle()
-
-            enemies.remove(enemy)
+            e.obj.hideturtle()
 
 
 
 
+    # 碰撞检测
 
-    # 子弹打飞机
+    for b in bullets[:]:
 
-    for bullet in bullets[:]:
-
-
-        for enemy in enemies[:]:
+        for e in enemies[:]:
 
 
-            if collision(bullet,enemy):
-
-
-                bullet.hideturtle()
-
-                enemy.hideturtle()
-
-
-
-                bullets.remove(bullet)
-
-                enemies.remove(enemy)
-
+            if abs(
+                b.xcor()-e.obj.xcor()
+            )<30 and abs(
+                b.ycor()-e.obj.ycor()
+            )<30:
 
 
                 score+=10
 
-
                 update_score()
+
+
+                b.hideturtle()
+
+                e.obj.hideturtle()
+
+
+                bullets.remove(b)
+
+                enemies.remove(e)
 
 
                 break
 
 
 
-
-
-# ======================
-# 游戏结束
-# ======================
-game_text=turtle.Turtle()
-
-game_text.color("white")
-
-game_text.penup()
-
-game_text.hideturtle()
-
-
-game_text.write(
-    "GAME OVER",
-    align="center",
-    font=("Arial",36,"bold")
-)
-
-
-
-screen.mainloop()
+    time.sleep(0.02)
